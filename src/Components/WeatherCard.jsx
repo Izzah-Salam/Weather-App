@@ -6,10 +6,12 @@ import { FaDroplet } from "react-icons/fa6";
 import { WiBarometer } from "react-icons/wi";
 import { weatherContext } from "../Context/ContextApi";
 import { WiNightAltCloudyGusts } from "react-icons/wi";
-
+import { WiDaySunny } from "react-icons/wi";
+import { WiDayHaze } from "react-icons/wi";
 const WeatherCard = () => {
-  const apiKey = "2dd7c3c9013bf22fed8a3979f7d95519";
-  const { city, setCity } = useContext(weatherContext);
+  const apiKey = "f94ffb48f4d1b096c49c190d0467da73";
+  const { city, setCity, setLon, setLat, setLoading, setError } =
+    useContext(weatherContext);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["Weather Data", city],
@@ -20,6 +22,7 @@ const WeatherCard = () => {
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
+
       return response.json();
     },
     enabled: !!city, // The query will only run if 'city' is not an empty string
@@ -41,8 +44,10 @@ const WeatherCard = () => {
           placeholder="Enter City"
         />
       </div>
+
       <div className="bg-slate-800 bg-opacity-30 backdrop-blur-lg backdrop-filter px-10 p-16 rounded-md text-center my-3">
         {isLoading && <p>Loading...</p>}
+
         {error && <p>Error fetching data: {error.message}</p>}
         {data && (
           <>
@@ -50,9 +55,25 @@ const WeatherCard = () => {
               {Math.round(data.main.temp)}°C
             </h1>
             <h2 className="text-3xl my-5">{data.weather[0].description}</h2>
-            <p className="text-sm my-5">
+            <p className="text-xl my-5">
               {data.name}, {data.sys.country}
             </p>
+            <div className="text-sm flex md:justify-between justify-center  flex-wrap">
+              <div className="flex items-center">
+                <WiDaySunny className="text-2xl" />
+                Sunrise:{" "}
+                {new Date(data.sys.sunrise * 1000).toLocaleTimeString()}
+              </div>
+              <span className="md:block hidden"> |</span>
+              <div className="flex items-center">
+                <WiDayHaze className="text-2xl" />
+                Sunset: {new Date(data.sys.sunset * 1000).toLocaleTimeString()}
+              </div>
+              <span className="md:block hidden"> |</span>
+              <div className="flex items-center">
+                Current Time: {new Date(data.dt * 1000).toLocaleTimeString()}
+              </div>
+            </div>
             <div className="grid md:grid-cols-2 grid-cols-1 gap-5 mt-10">
               <div className="p-5 bg-opacity-30 backdrop-blur-lg backdrop-filter bg-gray-950 rounded-md">
                 <div className="flex justify-center items-center">
@@ -87,7 +108,7 @@ const WeatherCard = () => {
                 <div className="flex justify-center mb-2">
                   <hr className="w-32" />
                 </div>
-                <span className="font-bold ">{data.wind.speed}m/s</span>
+                <span className="font-bold ">{data.wind.speed}MPH</span>
               </div>
               {/* Additional weather details can go here */}
               <div className="p-5 bg-opacity-30 backdrop-blur-lg backdrop-filter bg-gray-950 rounded-md">
@@ -101,6 +122,8 @@ const WeatherCard = () => {
                 <span className="font-bold ">{data.main.pressure}pa</span>
               </div>
             </div>
+            {setLon(data.coord.lon)}
+            {setLat(data.coord.lat)}
           </>
         )}
       </div>

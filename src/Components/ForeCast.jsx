@@ -1,69 +1,115 @@
 import { useQuery } from "@tanstack/react-query";
+import { useContext } from "react";
+import { weatherContext } from "../Context/ContextApi";
 
-const ForeCast = ({ city }) => {
-  const apiKey = "2dd7c3c9013bf22fed8a3979f7d95519";
+const ForeCast = ({ lat, lon }) => {
+  const apiKey = "f94ffb48f4d1b096c49c190d0467da73"; // Replace with your actual API key
+  console.log(lat);
+  console.log(lon);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["Weather Data", city],
+    queryKey: ["Weather Data", lat, lon],
     queryFn: async () => {
       const response = await fetch(
-        `https://pro.openweathermap.org/data/2.5/forecast/hourly?q=${city},{country code}&appid=${apiKey}`
+        `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`
       );
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
       return response.json();
     },
-    enabled: !!city, // The query will only run if 'city' is not an empty string
+    enabled: !!lat && !!lon, // The query will only run if lat and lon are available
   });
+
+  if (isLoading) return <div></div>;
+  if (error)
+    return (
+      <div>{/* Error: {error.message} {console.log(error.message)}; */}</div>
+    );
+
+  // Safeguard to ensure data and data.list are defined
+  if (!data || !data.list) return <div>No forecast data available.</div>;
   console.log(data);
+
+  // Extract up to 5 items from the data for hourly forecast
+  const hourlyData = data.list.slice(0, Math.min(12, data.list.length));
+
+  // Aggregate daily data by selecting the first available forecast for each day
+  const dailyData = [];
+  const daysProcessed = new Set();
+
+  data.list.forEach((item) => {
+    const date = new Date(item.dt * 1000);
+    const dayOfWeek = date.toLocaleDateString([], { weekday: "long" });
+
+    // If the day hasn't been added yet, add the first instance of that day
+    if (!daysProcessed.has(dayOfWeek)) {
+      dailyData.push(item);
+      daysProcessed.add(dayOfWeek);
+    }
+  });
 
   return (
     <div>
-      {/* hourly forecast */}
-      <div className="bg-slate-800 bg-opacity-70 backdrop-blur-lg backdrop-filter p-5 rounded-md">
-        <span className="text-sm my-2">HOURLY FORCAST</span>
+      {/* Hourly Forecast */}
+      <div className="bg-slate-800 bg-opacity-30 backdrop-blur-lg backdrop-filter p-5 rounded-md">
+        <span className="text-sm my-2">HOURLY FORECAST</span>
         <hr className="border-t-2 border-gray-500 rounded-lg my-2" />
-        <div className="bg-slate-900 inline-block px-5 py-2 m-3 text-center rounded-md">
-          <h2 className="text-sm">Now</h2>
-          <div className="text-xl font-bold">28</div>
-          <span>icon</span>
+        <div className="flex overflow-x-auto">
+          {hourlyData.map((hour, index) => (
+            <div
+              key={index}
+              className="bg-opacity-30 backdrop-blur-lg backdrop-filter bg-gray-950 inline-block px-5 py-2 m-3 text-center rounded-md"
+            >
+              <h2 className="text-sm">
+                {new Date(hour.dt * 1000).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </h2>
+              <div className="text-xl font-bold">
+                {Math.round(hour.main.temp)}°C
+              </div>
+              <img
+                src={`http://openweathermap.org/img/wn/${hour.weather[0].icon}.png`}
+                alt={hour.weather[0].description}
+                className="w-10 h-10 mx-auto"
+              />
+            </div>
+          ))}
         </div>
         <hr className="border-t-4 border-gray-500 rounded-lg my-2" />
       </div>
-      {/* hourly forecast */}
-      <div className="bg-slate-800 bg-opacity-70 backdrop-blur-lg backdrop-filter p-5 rounded-md mt-5">
-        <span className="text-sm my-2">10 DAYS FORCAST</span>
-        <hr className="border-t-2 border-gray-500 rounded-lg my-2" />
-        <div className="bg-slate-900 inline-block px-6 py-2 m-3 text-center rounded-md">
-          <h2 className="text-sm">Now</h2>
-          <div className="text-[12px] ">16/20</div>
-          <div className="text-xl font-bold">28</div>
-          <span>icon</span>
-        </div>
-        <hr className="border-t-4 border-gray-500 rounded-lg my-2" />
-      </div>
-      {/* Uv Index Or Wind Index */}
-      <div className="grid grid-cols-2 mt-4  gap-5">
-        <div className="bg-slate-800 bg-opacity-70 backdrop-blur-lg backdrop-filter p-5 rounded-md">
-          <div className="flex items-center">
-            {/* <FaTemperatureHigh /> */}
-            <h3>UV INDEX</h3>
-          </div>
-          <span>30</span>
-          <p>moderate</p>
-          <p>Use Sun protection until 8</p>
-        </div>
 
-        <div className="bg-slate-800 bg-opacity-70 backdrop-blur-lg backdrop-filter p-5 rounded-md">
-          <div className="flex items-center">
-            {/* <FaTemperatureHigh /> */}
-            <h3>WIND</h3>
-          </div>
-          <span>3 MPH</span>
-          <hr />
-          <span>9 MPH</span>
+      {/* Daily Forecast */}
+      <div className="bg-slate-800 bg-opacity-70 backdrop-blur-lg backdrop-filter p-5 rounded-md mt-5">
+        <span className="text-sm my-2">WEEKLY FORECAST</span>
+        <hr className="border-t-2 border-gray-500 rounded-lg my-2" />
+        <div className="grid md:grid-cols-3 grid-cols-1 gap-4">
+          {dailyData.slice(0, 10).map((day, index) => (
+            <div
+              key={index}
+              className="bg-opacity-30 backdrop-blur-lg backdrop-filter bg-gray-950 inline-block px-6 py-2 m-3 text-center rounded-md"
+            >
+              <h2 className="text-sm">
+                {new Date(day.dt * 1000).toLocaleDateString([], {
+                  weekday: "long",
+                })}
+              </h2>
+              <div className="text-[12px]">
+                {Math.round(day.main.temp_min)}°C /{" "}
+                {Math.round(day.main.temp_max)}°C
+              </div>
+              <img
+                src={`http://openweathermap.org/img/wn/${day.weather[0].icon}.png`}
+                alt={day.weather[0].description}
+                className="w-10 h-10 mx-auto"
+              />
+              <div className="text-[12px]">{day?.weather[0]?.description}</div>
+            </div>
+          ))}
         </div>
+        <hr className="border-t-4 border-gray-500 rounded-lg my-2" />
       </div>
     </div>
   );

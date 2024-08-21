@@ -1,7 +1,10 @@
+import { useContext } from "react";
 import bg from "./assets/img/bg.avif";
 import WeatherDashboard from "./Components/WeatherDashboard";
+import { weatherContext } from "./Context/ContextApi";
 
 function App() {
+  const { Loading, Error } = useContext(weatherContext);
   return (
     <>
       <div

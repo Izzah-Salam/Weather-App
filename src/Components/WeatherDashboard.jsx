@@ -5,7 +5,9 @@ import { useContext } from "react";
 import { weatherContext } from "../Context/ContextApi";
 
 const WeatherDashboard = () => {
-  const { city, setCity } = useContext(weatherContext);
+  const { lat, lon } = useContext(weatherContext);
+  // if (Loading) return <p>Data is Loading</p>;
+
   return (
     <div>
       <div className="grid lg:grid-cols-2 grid-cols-1 gap-8 mx-10 py-4">
@@ -13,7 +15,7 @@ const WeatherDashboard = () => {
           <WeatherCard />
         </div>
         <div>
-          <ForeCast city={city} />
+          <ForeCast lat={lat} lon={lon} />
         </div>
       </div>
     </div>
