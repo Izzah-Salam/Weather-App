@@ -6,7 +6,6 @@ import { weatherContext } from "../Context/ContextApi";
 
 const WeatherDashboard = () => {
   const { lat, lon } = useContext(weatherContext);
-  // if (Loading) return <p>Data is Loading</p>;
 
   return (
     <div>

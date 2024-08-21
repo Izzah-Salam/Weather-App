@@ -10,8 +10,7 @@ export const WeatherProvider = ({ children }) => {
   const [city, setCity] = useState("karachi");
   const [lon, setLon] = useState(null);
   const [lat, setLat] = useState(null);
-  const [Loading, setLoading] = useState("");
-  const [Error, setError] = useState("");
+
   return (
     <weatherContext.Provider
       value={{
@@ -21,10 +20,6 @@ export const WeatherProvider = ({ children }) => {
         setLon,
         lat,
         setLat,
-        Loading,
-        setLoading,
-        Error,
-        setError,
       }}
     >
       {children}

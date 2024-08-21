@@ -1,6 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { useContext } from "react";
-import { weatherContext } from "../Context/ContextApi";
 
 const ForeCast = ({ lat, lon }) => {
   const apiKey = "f94ffb48f4d1b096c49c190d0467da73"; // Replace with your actual API key
@@ -21,14 +19,27 @@ const ForeCast = ({ lat, lon }) => {
     enabled: !!lat && !!lon, // The query will only run if lat and lon are available
   });
 
-  if (isLoading) return <div></div>;
+  if (isLoading)
+    return (
+      <div className="flex justify-center items-center  md:text-2xl  text-xl bg-slate-800 bg-opacity-30 backdrop-blur-lg backdrop-filter px-10 p-16 rounded-md text-center mt-12">
+        Loading Forcast data...
+      </div>
+    );
   if (error)
     return (
-      <div>{/* Error: {error.message} {console.log(error.message)}; */}</div>
+      <div className="flex justify-center items-center  md:text-2xl  text-xl bg-slate-800 bg-opacity-30 backdrop-blur-lg backdrop-filter px-10 p-16 rounded-md text-center mt-12">
+        {" "}
+        Error: {error.message}{" "}
+      </div>
     );
 
   // Safeguard to ensure data and data.list are defined
-  if (!data || !data.list) return <div>No forecast data available.</div>;
+  if (!data || !data.list)
+    return (
+      <div className="flex justify-center items-center  md:text-2xl  text-xl bg-slate-800 bg-opacity-30 backdrop-blur-lg backdrop-filter px-10 p-16 rounded-md text-center mt-12">
+        No forecast data available.
+      </div>
+    );
   console.log(data);
 
   // Extract up to 5 items from the data for hourly forecast
@@ -59,7 +70,7 @@ const ForeCast = ({ lat, lon }) => {
           {hourlyData.map((hour, index) => (
             <div
               key={index}
-              className="bg-opacity-30 backdrop-blur-lg backdrop-filter bg-gray-950 inline-block px-5 py-2 m-3 text-center rounded-md"
+              className="bg-opacity-30 backdrop-blur-lg backdrop-filter bg-gray-950 duration-700 cursor-pointer hover:bg-gray-900 inline-block px-5 py-2 m-3 text-center rounded-md"
             >
               <h2 className="text-sm">
                 {new Date(hour.dt * 1000).toLocaleTimeString([], {
@@ -89,7 +100,7 @@ const ForeCast = ({ lat, lon }) => {
           {dailyData.slice(0, 10).map((day, index) => (
             <div
               key={index}
-              className="bg-opacity-30 backdrop-blur-lg backdrop-filter bg-gray-950 inline-block px-6 py-2 m-3 text-center rounded-md"
+              className="bg-opacity-30 backdrop-blur-lg backdrop-filter bg-gray-950 duration-700 cursor-pointer hover:bg-gray-900 inline-block px-6 py-2 m-3 text-center rounded-md"
             >
               <h2 className="text-sm">
                 {new Date(day.dt * 1000).toLocaleDateString([], {
